@@ -67,7 +67,11 @@ module NTLM
     end
 
     # The MIC is an HMAC_MD5 applied to the concatenation of the previous two NTLM massages using the session key
-    bytes :mic, length: ->{ 16 }, onlyif: ->{ (flags_low.negotiate_always_sign? || flags_low.negotiate_sign?) && flags_high.negotiate_version? }
+    # https://social.msdn.microsoft.com/Forums/en-US/74e16cb4-c534-407e-b9cd-ee70a796ee91/msnlmp-dummy-signature-and-mic-generation-ntlmsspnegotiatealwayssign
+    bytes :mic, length: ->{ 16 }, onlyif: ->{
+      flags_low.negotiate_always_sign? && flags_high.negotiate_key_exchange? &&
+      !flags_low.negotiate_sign? && !flags_low.negotiate_seal?
+    }
 
     remaining_bytes :buffer
 
