@@ -1,6 +1,7 @@
 require "../ntlm"
 
 module NTLM
+  # Client sends this to the MS server
   # https://docs.microsoft.com/en-us/openspecs/windows_protocols/ms-nlmp/b34032e5-3aae-4bc6-84c3-c6d80eadf7f2
   class Negotiate < BinData
     endian little
@@ -86,7 +87,6 @@ module NTLM
       byte
     end
 
-    # NOTE:: currently destructive if OS version information was included
     def update_buffer
       # ensure the current values are known
       domain

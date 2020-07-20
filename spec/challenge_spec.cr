@@ -11,7 +11,7 @@ describe NTLM do
     message.flags_low.characters_oem?.should eq(true)
     message.flags_low.negotiate_ntlm?.should eq(true)
 
-    message.target_name.should eq("")
+    message.domain.should eq("")
 
     message.to_slice.hexstring.should eq(hexstring)
   end
@@ -32,15 +32,15 @@ describe NTLM do
     message.flags_low.characters_unicode?.should eq(true)
     message.flags_low.negotiate_ntlm?.should eq(true)
     message.flags_high.target_type_domain?.should eq(true)
-    message.flags_high.negotiate_target_info?.should eq(true)
+    message.flags_high.negotiate_domain_info?.should eq(true)
 
-    message.target_name.should eq("DOMAIN")
-    message.target_info.size.should eq(4)
+    message.domain.should eq("DOMAIN")
+    message.domain_info.size.should eq(4)
 
-    message.target_info[0].unicode_value.should eq("DOMAIN")
-    message.target_info[1].unicode_value.should eq("SERVER")
-    message.target_info[2].unicode_value.should eq("domain.com")
-    message.target_info[3].unicode_value.should eq("server.domain.com")
+    message.domain_info[0].unicode_value.should eq("DOMAIN")
+    message.domain_info[1].unicode_value.should eq("SERVER")
+    message.domain_info[2].unicode_value.should eq("domain.com")
+    message.domain_info[3].unicode_value.should eq("server.domain.com")
 
     message.to_slice.hexstring.should eq(hexstring)
   end
@@ -56,7 +56,7 @@ describe NTLM do
     data = IO::Memory.new hexstring.hexbytes
     message = data.read_bytes(NTLM::Challenge)
 
-    message.target_name = "DOMAIN"
+    message.domain = "DOMAIN"
 
     message.to_slice.hexstring.should eq(hexstring)
   end

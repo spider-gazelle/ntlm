@@ -60,7 +60,7 @@ module NTLM
     # requests the usage of the LMOWF
     RequestNonNTSessionKey
     # indicates that the TargetInfo fields in the CHALLENGE are populated
-    NegotiateTargetInfo
+    NegotiateDomainInfo
     Reserved1
     # requests the protocol version number
     NegotiateVersion

@@ -2,9 +2,9 @@ version: 2.0
 shards:
   ameba:
     git: https://github.com/veelenga/ameba.git
-    version: 0.13.0
+    version: 0.13.1
 
   bindata:
     git: https://github.com/spider-gazelle/bindata.git
-    version: 1.5.5
+    version: 1.5.6
 
