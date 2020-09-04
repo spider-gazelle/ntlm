@@ -1,4 +1,5 @@
 require "bindata"
+require "base64"
 
 module NTLM
   class Error < Exception; end
@@ -80,6 +81,39 @@ module NTLM
 
     string :protocol, value: ->{ "NTLMSSP" }
     enum_field UInt32, message_type : Type = Type::Negotiate
+  end
+
+  def self.negotiate(domain : String? = nil)
+    msg1 = NTLM::Negotiate.new
+    msg1.domain = domain.not_nil! if domain
+    msg1
+  end
+
+  def self.negotiate_http(domain : String? = nil)
+    "NTLM #{Base64.strict_encode negotiate(domain)}"
+  end
+
+  def self.authenticate(challenge : String, username : String, password : String)
+    challenge = challenge.starts_with?("NTLM ") ? challenge[5..-1] : challenge
+    data = IO::Memory.new Base64.decode(challenge)
+    challenge = data.read_bytes(NTLM::Challenge)
+
+    domain = challenge.domain
+    server_challenge = challenge.challenge
+    client_challenge = Random.new.random_bytes(8)
+
+    nt_response, lm_response = NTLM.ntlm2sr_challenge_response(NTLM.create_NT_hashed_password_v1(password), server_challenge, client_challenge)
+
+    auth = NTLM::Authenticate.new
+    auth.domain = domain
+    auth.user = username
+    auth.lm_response = lm_response
+    auth.nt_response = nt_response
+    auth
+  end
+
+  def self.authenticate_http(challenge : String, username : String, password : String)
+    "NTLM #{Base64.strict_encode authenticate(challenge, username, password)}"
   end
 end
 

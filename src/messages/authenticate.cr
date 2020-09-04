@@ -1,14 +1,6 @@
 require "../ntlm"
 
 module NTLM
-  # We only implement the NTLMv2 responses
-  class ResponseV2 < BinData
-    endian little
-
-    bytes :response, length: ->{ 16 }
-    remaining_bytes :client_challenge
-  end
-
   # Client authenticates with the server using the challenge
   # https://docs.microsoft.com/en-us/openspecs/windows_protocols/ms-nlmp/033d32cc-88f9-4483-9bf2-b273055038ce
   class Authenticate < BinData
@@ -54,7 +46,7 @@ module NTLM
     end
 
     enum_field UInt16, flags_low : FlagsLow = FlagsLow::CharactersUnicode | FlagsLow::RequestTarget | FlagsLow::NegotiateNTLM
-    enum_field UInt16, flags_high : FlagsHigh = FlagsHigh::None
+    enum_field UInt16, flags_high : FlagsHigh = FlagsHigh::NegotiateSessionSecurity
 
     # https://docs.microsoft.com/en-us/openspecs/windows_protocols/ms-nlmp/b1a6ceb2-f8ad-462b-b5af-f18527c48175
     group :version, onlyif: ->{ flags_high.negotiate_version? } do
@@ -95,17 +87,19 @@ module NTLM
 
     # ResponseV2 getters
     {% for name in [:lm_response, :nt_response] %}
-      @{{name.id}} : ResponseV2? = nil
+      @{{name.id}} : Bytes? = nil
 
-      def {{name.id}} : ResponseV2
+      def {{name.id}} : Bytes
         response = @{{name.id}}
         return response if response
-        return ResponseV2.new if {{name.id}}_loc.length == 0
-        start_byte = {{name.id}}_loc.offset - buffer_start
-        end_byte = start_byte + {{name.id}}_loc.length
+        if {{name.id}}_loc.length == 0
+          @{{name.id}} = Bytes.new(0)
+        else
+          start_byte = {{name.id}}_loc.offset - buffer_start
+          end_byte = start_byte + {{name.id}}_loc.length
 
-        buff = IO::Memory.new(buffer[start_byte...end_byte])
-        @{{name.id}} = buff.read_bytes(ResponseV2)
+          @{{name.id}} = buffer[start_byte...end_byte]
+        end
       end
     {% end %}
 
@@ -114,12 +108,15 @@ module NTLM
     # Session key getter
     def session_key : Bytes
       response = @session_key
-      response = @session_key = Bytes.new(0) if session_key_loc.length == 0
       return response if response
 
-      start_byte = session_key_loc.offset - buffer_start
-      end_byte = start_byte + session_key_loc.length
-      @session_key = buffer[start_byte...end_byte]
+      if session_key_loc.length == 0
+        @session_key = Bytes.new(0)
+      else
+        start_byte = session_key_loc.offset - buffer_start
+        end_byte = start_byte + session_key_loc.length
+        @session_key = buffer[start_byte...end_byte]
+      end
     end
 
     # configure the setters
@@ -152,7 +149,7 @@ module NTLM
 
         {% for name in [:lm_response, :nt_response] %}
           start_offset = buff.pos
-          buff.write_bytes({{name.id}}, IO::ByteFormat::LittleEndian)
+          buff.write({{name.id}})
           length = (buff.pos - start_offset).to_u16
           self.{{name.id}}_loc.offset = (start_byte + start_offset).to_u32
           self.{{name.id}}_loc.length = length

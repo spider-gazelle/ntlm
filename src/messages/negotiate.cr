@@ -10,7 +10,7 @@ module NTLM
     enum_field UInt32, message_type : Type = Type::Negotiate
 
     enum_field UInt16, flags_low : FlagsLow = FlagsLow::CharactersUnicode | FlagsLow::RequestTarget | FlagsLow::NegotiateNTLM
-    enum_field UInt16, flags_high : FlagsHigh = FlagsHigh::None
+    enum_field UInt16, flags_high : FlagsHigh = FlagsHigh::NegotiateSessionSecurity
 
     group :domain_loc, onlyif: ->{ flags_low.negotiate_domain_supplied? || flags_low.negotiate_workstation_supplied? || flags_high.negotiate_version? } do
       uint16 :length

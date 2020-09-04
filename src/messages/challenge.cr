@@ -52,7 +52,8 @@ module NTLM
     enum_field UInt16, flags_low : FlagsLow = FlagsLow::CharactersUnicode | FlagsLow::RequestTarget | FlagsLow::NegotiateNTLM
     enum_field UInt16, flags_high : FlagsHigh = FlagsHigh::None
 
-    uint64 :challenge
+    # 64bit challenge
+    bytes :challenge, length: ->{ 8 }
     uint64 :context, onlyif: ->{ has_context? }
 
     group :domain_info_loc, onlyif: ->{ flags_high.negotiate_domain_info? } do
