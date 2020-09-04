@@ -1,9 +1,15 @@
 require "../ntlm"
 require "openssl"
+require "openssl/hmac"
 require "digest/md5"
 
 module NTLM
   extend self
+
+  def create_NT_hashed_password_v2(password, user, domain)
+    key = create_NT_hashed_password_v1(password)
+    OpenSSL::HMAC.digest(:md5, key, "#{user.upcase}#{domain}".encode("UTF-16LE"))
+  end
 
   def ntlm2sr_challenge_response(password_hash : Bytes, server_challenge : Bytes, client_challenge : Bytes)
     buff = IO::Memory.new(Bytes.new(24))

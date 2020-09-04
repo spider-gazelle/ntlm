@@ -4,10 +4,15 @@ describe NTLM do
   password = "Password"
   server_challenge = "0123456789abcdef".hexbytes
   client_challenge = ("\xaa" * 8).to_slice
+  user = "User"
+  domain = "Domain"
 
   it "should create a NT hashed password" do
     hash = NTLM.create_NT_hashed_password_v1(password)
     hash.should eq "a4f49c406510bdcab6824ee7c30fd852".hexbytes
+
+    hash = NTLM.create_NT_hashed_password_v2(password, user, domain)
+    hash.should eq "0c868a403bfd7a93a3001ef22ef02e3f".hexbytes
   end
 
   it "should create a LM hashed password" do
