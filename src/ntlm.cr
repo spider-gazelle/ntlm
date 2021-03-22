@@ -102,7 +102,7 @@ module NTLM
     server_challenge = challenge.challenge
     client_challenge = Random.new.random_bytes(8)
 
-    nt_response, lm_response = NTLM.ntlm2sr_challenge_response(NTLM.create_NT_hashed_password_v1(password), server_challenge, client_challenge)
+    nt_response, lm_response = NTLM.ntlm2sr_challenge_response(NTLM.create_nt_hashed_password_v1(password), server_challenge, client_challenge)
 
     auth = NTLM::Authenticate.new
     auth.domain = domain

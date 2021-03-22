@@ -6,8 +6,8 @@ require "digest/md5"
 module NTLM
   extend self
 
-  def create_NT_hashed_password_v2(password, user, domain)
-    key = create_NT_hashed_password_v1(password)
+  def create_nt_hashed_password_v2(password, user, domain)
+    key = create_nt_hashed_password_v1(password)
     OpenSSL::HMAC.digest(:md5, key, "#{user.upcase}#{domain}".encode("UTF-16LE"))
   end
 
@@ -54,17 +54,17 @@ module NTLM
 
   def create_sessionbasekey(password)
     md4 = OpenSSL::Digest.new("MD4")
-    md4.update(create_NT_hashed_password_v1(password))
+    md4.update(create_nt_hashed_password_v1(password))
     md4.final
   end
 
-  def create_NT_hashed_password_v1(password)
+  def create_nt_hashed_password_v1(password)
     md4 = OpenSSL::Digest.new("MD4")
     md4.update(password.encode("UTF-16LE"))
     md4.final
   end
 
-  def create_LM_hashed_password_v1(password)
+  def create_lm_hashed_password_v1(password)
     # fix the password length to 14 bytes
     password = password.upcase
     padding = 14 - password.size
