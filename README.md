@@ -1,6 +1,6 @@
 # Crystal Lang NTLM Auth
 
-[![Build Status](https://travis-ci.com/spider-gazelle/ntlm.svg?branch=master)](https://travis-ci.com/github/spider-gazelle/ntlm)
+[![CI](https://github.com/spider-gazelle/ntlm/actions/workflows/ci.yml/badge.svg)](https://github.com/spider-gazelle/ntlm/actions/workflows/ci.yml)
 
 Communicate with servers that implement NTLM auth.
 
